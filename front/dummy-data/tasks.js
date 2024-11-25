@@ -42,7 +42,7 @@ const tasks = [
     {
         id: 5,
         title: "Implement user roles",
-        description: "Add role-based access control for users and admins.",
+        description: "Add role-based access control for user and admins.",
         deadline: new Date("2024-11-25T09:00:00"),
         status: "Pending Review",
         priority: 1,
