@@ -40,10 +40,12 @@ async function httpAddUser(req, res) {
     user.password = await bcrypt.hash(user.password, 10);
 
     const addedUser = await addUser(user);
-    console.log(addedUser)
+    const token = await generateToken({ id: user.id, email: user.email });
+
     return res.status(201).json({
         ok: 1,
-        user: addedUser
+        user: addedUser,
+        token
     })
 }
 
@@ -55,12 +57,13 @@ async function httpLogin(req, res) {
     const { email, password } = req.body;
 
         const reqUser = await checkIfUserExists(email);
-        const user = reqUser.dataValues;
-        if (!user) {
+        if (!reqUser) {
             return res.status(401).json({
                 error: 'No users with the provided email exists!'
             })
         }
+        
+        const user = reqUser.dataValues;
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
@@ -68,7 +71,7 @@ async function httpLogin(req, res) {
                 error: 'Invalid password!'
             })
         }
-    console.log(user)
+
         const token = await generateToken({ id: user.id, email: user.email });
         return res.status(200).json({
             ok: 1,
@@ -79,8 +82,8 @@ async function httpLogin(req, res) {
 
 async function httpLogout(req, res) {
     const user = req.body.user;
-    console.log(user)
     const rowDelCount = await deleteToken(user);
+
     if (rowDelCount === 1) {
         return res.status(200).json({
             message: `User ${user.email} access token was successfully deleted!`
@@ -88,7 +91,7 @@ async function httpLogout(req, res) {
     }
     else {
         return res.status(401).json({
-            error: `User ${user.email}: access token was couldn't be deleted!`
+            error: `User ${user.email}: access token couldn't be deleted!`
         })
     }
 }

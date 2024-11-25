@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { useState } from "react";
+import { UserProvider } from "@/contexts/UserContext";
+import { TokenProvider } from "@/contexts/TokenContext";
 
 export default function RootLayout({ children }) {
   const [theme, setTheme] = useState("dark");
@@ -36,7 +38,11 @@ export default function RootLayout({ children }) {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {children}
+          <UserProvider>
+        <TokenProvider>
+            {children}
+        </TokenProvider>
+          </UserProvider>
       </body>
     </html>
   );
