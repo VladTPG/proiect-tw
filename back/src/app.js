@@ -11,7 +11,9 @@ const FRONT_PORT = process.env.FRONT_PORT || 3000;
 const app = express();
 
 app.use(cors({
-    origin: `http://localhost:${FRONT_PORT}`
+    origin: `http://localhost:${FRONT_PORT}`,
+    methods: 'GET,PUT,PATCH,POST,DELETE',
+    credentials: true,
 }));
 app.use(morgan('combined'));
 

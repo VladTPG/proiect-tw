@@ -12,8 +12,37 @@ import {
     SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import Select40 from "@/components/dropdownSelector";
+import { useUser } from "@/contexts/UserContext";
+import { useToken } from "@/contexts/TokenContext";
+import axios from "axios";
+import {useRouter} from "next/navigation"
 
 export default function AppSidebar() {
+    const {user, setUser} = useUser();
+    const {token, setToken} = useToken();
+    const router = useRouter();
+
+    const handleLogout = () => {
+        const config = {
+            headers: {
+                Authorization: `Bearer ${token}` 
+            }
+        }
+        console.log(token);
+        console.log(user);
+        
+        
+        axios.post('http://localhost:8000/auth/logout', user, config)
+            .then(response => {
+                setToken(null)
+                setUser(null)
+                router.push('/')
+            }) 
+            .catch(err => {
+                console.log(err.response.data.error);
+            })
+    }
+
     return (
         <Sidebar className="w-64 h-screen">
 
@@ -82,15 +111,16 @@ export default function AppSidebar() {
                             <a href="/settings" className="flex items-center space-x-2 p-2 rounded-md">
                                 <Settings className="h-5 w-5"/>
                                 <span>Settings</span>
+                                <span>caca {token}</span>
                             </a>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
 
 
                     <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                            <a href="/logout" className="flex items-center space-x-2 p-2 rounded-md">
-                                <LogOut className="h-5 w-5"/>
+                        <SidebarMenuButton asChild onClick={handleLogout}>
+                            <a className="flex items-center space-x-2 p-2 rounded-md">
+                                <LogOut className="h-5 w-5"  />
                                 <span>Logout</span>
                             </a>
                         </SidebarMenuButton>
