@@ -1,12 +1,11 @@
 import React from "react";
-import {TaskTable} from "@/app/(main)/dashboard/taskTable";
+import { TaskTable } from "@/app/(main)/dashboard/taskTable";
 
 const Page = () => {
   return (
-      <div className="w-full">
-        <TaskTable/>
-
-      </div>
+    <div className="px-5">
+      <TaskTable />
+    </div>
   );
 };
 
