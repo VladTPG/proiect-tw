@@ -7,7 +7,6 @@ import {
   Mail,
   Settings,
 } from "lucide-react";
-
 import {
   Sidebar,
   SidebarContent,
@@ -36,12 +35,10 @@ export default function AppSidebar() {
         Authorization: `Bearer ${token}`,
       },
     };
-    console.log(token);
-    console.log(user);
 
     axios
       .post("http://localhost:8000/auth/logout", user, config)
-      .then((response) => {
+      .then(() => {
         setToken(null);
         setUser(null);
         router.push("/");
@@ -54,7 +51,7 @@ export default function AppSidebar() {
   return (
     <Sidebar className="w-64 h-screen">
       <SidebarHeader>
-        <Select40></Select40>
+        <Select40 />
       </SidebarHeader>
 
       <SidebarContent>
@@ -124,16 +121,17 @@ export default function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
               <a
-                href="/settings"
+                href="/accountsettings"
                 className="flex items-center space-x-2 p-2 rounded-md"
               >
                 <Settings className="h-5 w-5" />
-                <span>Settings</span>
+                <span>Account settings</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
