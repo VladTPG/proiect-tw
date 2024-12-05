@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 8000;
 const server = http.createServer(app);
 
 async function startServer() {
-    await syncDB();
+    // await syncDB();
 
     server.listen(PORT, () => {
         console.log("Server listening on PORT", PORT);

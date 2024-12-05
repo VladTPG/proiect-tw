@@ -42,7 +42,9 @@ async function updateUser(user, ORM = true) {
         });
     }
     else {
-
+        return await User.update(user, {
+            where: { email: user.email }
+        });
     }
 }
 

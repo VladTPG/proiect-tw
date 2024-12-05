@@ -106,6 +106,9 @@ async function httpUpdateUser(req, res) {
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
+
+        user.password = await bcrypt.hash(user.password, 10);
+        
         await user.update(updatedUser);
 
         return res.json({ message: 'User updated successfully', user });
