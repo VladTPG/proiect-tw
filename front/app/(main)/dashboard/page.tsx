@@ -1,12 +1,12 @@
-import React from "react";
-import { TaskTable } from "@/app/(main)/dashboard/taskTable";
+"use client";
 
-const Page = () => {
+import { TaskTable } from "@/components/TaskTable";
+import tasks from "@/dummy-data/tasks";
+
+export default function DashboardPage() {
   return (
-    <div className="px-5">
-      <TaskTable />
+    <div className="container mx-auto p-6">
+      <TaskTable tasks={tasks} />
     </div>
   );
-};
-
-export default Page;
+}

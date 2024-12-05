@@ -2,11 +2,22 @@
 
 import tasks, { Task } from "@/dummy-data/tasks";
 import TaskCard from "@/components/taskCard";
-import React from "react";
+import React, { useState } from "react";
 import { useProject } from "@/contexts/ProjectContext";
 
 export const TaskTable = () => {
   const { selectedProjectId } = useProject();
+  const [selectedTasks, setSelectedTasks] = useState<Set<number>>(new Set());
+
+  const toggleTask = (taskId: number) => {
+    const newSelected = new Set(selectedTasks);
+    if (newSelected.has(taskId)) {
+      newSelected.delete(taskId);
+    } else {
+      newSelected.add(taskId);
+    }
+    setSelectedTasks(newSelected);
+  };
 
   if (!selectedProjectId) {
     return (
@@ -21,30 +32,21 @@ export const TaskTable = () => {
   );
 
   return (
-    <table className="w-full">
-      <thead>
-        <tr>
-          <th className="p-2 text-left border-b">Title</th>
-          <th className="p-2 text-left border-b">Description</th>
-          <th className="p-2 text-left border-b">Deadline</th>
-          <th className="p-2 text-left border-b">Status</th>
-          <th className="p-2 text-left border-b">Priority</th>
-          <th className="p-2 text-left border-b">Asignee</th>
-        </tr>
-      </thead>
-      <tbody className={"border-b"}>
-        {filteredTasks.length > 0 ? (
-          filteredTasks.map((task: Task) => (
-            <TaskCard key={task.id} task={task}></TaskCard>
-          ))
-        ) : (
-          <tr>
-            <td colSpan={6} className="text-center p-4 text-muted-foreground">
-              No tasks found for this project
-            </td>
-          </tr>
-        )}
-      </tbody>
-    </table>
+    <div className="space-y-1">
+      {filteredTasks.length > 0 ? (
+        filteredTasks.map((task: Task) => (
+          <TaskCard
+            key={task.id}
+            task={task}
+            isSelected={selectedTasks.has(task.id)}
+            onToggleSelect={() => toggleTask(task.id)}
+          />
+        ))
+      ) : (
+        <div className="text-center p-4 text-muted-foreground">
+          No tasks found for this project
+        </div>
+      )}
+    </div>
   );
 };
