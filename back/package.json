@@ -5,7 +5,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "cross-env PORT=8000 nodemon src/server.js",
-    "start": "cross-env PORT=8000 node src/server.js"
+    "start": "cross-env PORT=8000 node src/server.js",
+    "syncDb": "node src/config/syncDb.js"
   },
   "keywords": [],
   "author": "",
