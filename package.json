@@ -7,7 +7,8 @@
     "deploy": "npm run build --prefix front && npm start --prefix back",
     "front": "npm run dev --prefix front",
     "back": "npm run start --prefix back",
-    "watch": "run-p back front"
+    "watch": "run-p back front",
+    "start": "npm run watch"
   },
   "keywords": [],
   "author": "",
