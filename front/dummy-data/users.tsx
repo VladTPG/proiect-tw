@@ -14,6 +14,7 @@ const users: User[] = [
     email: "johndoe@example.com",
     password: "password123",
     isAdmin: false,
+    profilePicture: null,
   },
   {
     id: 2,
@@ -21,13 +22,15 @@ const users: User[] = [
     email: "janesmith@example.com",
     password: "password123",
     isAdmin: true,
+    profilePicture: null,
   },
   {
     id: 3,
-    displayName: "Alice Johnson",
+    displayName: "You",
     email: "alicejohnson@example.com",
     password: "password123",
     isAdmin: false,
+    profilePicture: null,
   },
   {
     id: 4,
@@ -35,6 +38,7 @@ const users: User[] = [
     email: "bobbrown@example.com",
     password: "password123",
     isAdmin: false,
+    profilePicture: null,
   },
 ];
 
