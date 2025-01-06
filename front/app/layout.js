@@ -19,6 +19,9 @@ export default function RootLayout({ children }) {
 
   return (
     <html lang="en" suppressHydrationWarning={true}>
+      <head>
+        <title>Task Tracker</title>
+      </head>
       <body className={`antialiased ${theme}`}>
         <UserProvider>
           <TokenProvider>

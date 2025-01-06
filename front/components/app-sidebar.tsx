@@ -6,6 +6,7 @@ import {
   LogOut,
   Mail,
   Settings,
+  Users,
 } from "lucide-react";
 import {
   Sidebar,
@@ -117,6 +118,20 @@ export default function AppSidebar() {
                   </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+
+              {user?.isAdmin && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <a
+                      href="/admin"
+                      className="flex items-center space-x-2 p-2 rounded-md"
+                    >
+                      <Users className="h-5 w-5" />
+                      <span>User Management</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

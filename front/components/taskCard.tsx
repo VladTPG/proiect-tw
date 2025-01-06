@@ -47,7 +47,7 @@ export default function TaskCard({
       </td>
       <td className="p-4">
         <div className="flex items-center gap-3">
-          <span className="font-medium text-sm">{task.title}</span>
+          <span className="font-medium text-sm flex-1">{task.title}</span>
           <PriorityBadge priority={task.priority} />
         </div>
       </td>

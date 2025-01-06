@@ -128,4 +128,29 @@ async function httpUpdateUser(req, res) {
   }
 }
 
-export { httpGetAllUsers, httpAddUser, httpLogin, httpLogout, httpUpdateUser };
+async function httpDeleteUser(req, res) {
+  const { id } = req.params;
+
+  try {
+    const userToDelete = await findUserByPk(id);
+
+    if (!userToDelete) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    await userToDelete.destroy();
+    return res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    console.error("Delete user error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+export {
+  httpGetAllUsers,
+  httpAddUser,
+  httpLogin,
+  httpLogout,
+  httpUpdateUser,
+  httpDeleteUser,
+};
