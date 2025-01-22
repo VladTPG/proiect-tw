@@ -19,6 +19,7 @@ import { useState, useEffect } from "react";
 import { useToken } from "@/contexts/TokenContext";
 import axios from "axios";
 import User from "@/types/user";
+import { UserPlus } from "lucide-react";
 
 interface InviteModalProps {
   projectId: number;
@@ -102,6 +103,7 @@ export function InviteModal({ projectId, onInviteSent }: InviteModalProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
+          <UserPlus className="h-4 w-4 mr-2" />
           Invite User
         </Button>
       </DialogTrigger>

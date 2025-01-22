@@ -179,8 +179,9 @@ export function AddTaskModal({ projectId, onTaskAdded }: AddTaskModalProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="w-full">
-          <Plus className="mr-2 h-4 w-4" /> Add Task
+        <Button variant="outline" size="sm">
+          <Plus className="h-4 w-4 mr-2" />
+          Add Task
         </Button>
       </DialogTrigger>
       <DialogContent>
