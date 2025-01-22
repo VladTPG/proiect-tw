@@ -11,6 +11,7 @@ import { AddTaskModal } from "@/components/addTaskModal";
 import { EditTaskModal } from "@/components/editTaskModal";
 import { Task } from "@/types/task";
 import User from "@/types/user";
+import { InviteModal } from "@/components/inviteModal";
 
 const statusLabels: { [key: string]: string } = {
   "Not Started": "Not Started",
@@ -263,10 +264,18 @@ export const TaskTable = () => {
 
       {isManager && (
         <>
-          <AddTaskModal
-            projectId={selectedProjectId}
-            onTaskAdded={fetchTasks}
-          />
+          <div className="flex gap-2">
+            <AddTaskModal
+              projectId={selectedProjectId}
+              onTaskAdded={fetchTasks}
+            />
+            <InviteModal
+              projectId={selectedProjectId}
+              onInviteSent={() => {
+                // Optionally refresh data
+              }}
+            />
+          </div>
           <EditTaskModal
             task={editingTask}
             open={!!editingTask}

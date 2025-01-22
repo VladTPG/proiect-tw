@@ -113,16 +113,22 @@ export default function TaskCard({
   };
 
   const handleSubmitForReview = async () => {
-    if (!token) return;
+    if (!token || !task) return;
 
+    setIsSubmittingForReview(true);
     try {
-      setIsSubmittingForReview(true);
       const response = await axios.put(
         `http://localhost:8000/task/update/${task.id}`,
         {
           task: {
-            ...task,
+            id: task.id,
             status: "Pending Review",
+            title: task.title,
+            description: task.description,
+            deadline: task.deadline,
+            priority: task.priority,
+            projectId: task.projectId,
+            userId: task.userId,
           },
         },
         {
@@ -133,12 +139,14 @@ export default function TaskCard({
         }
       );
 
-      if (response.data.ok) {
+      if (response.status === 200) {
         onTaskUpdated();
+      } else {
+        throw new Error("Failed to update task status");
       }
     } catch (error) {
       console.error("Error submitting task for review:", error);
-      alert("Failed to submit task for review");
+      alert(error.response?.data?.error || "Failed to submit task for review");
     } finally {
       setIsSubmittingForReview(false);
     }

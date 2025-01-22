@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import axios from "axios";
 import { useToken } from "./TokenContext";
+import { useUser } from "@/contexts/UserContext";
 
 type Project = {
   id: number;
@@ -30,41 +31,68 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
   );
   const [projects, setProjects] = useState<Project[]>([]);
   const { token } = useToken();
+  const { user } = useUser();
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  const refreshProjects = useCallback(async () => {
-    if (!token) return;
+  const fetchProjects = useCallback(async () => {
+    if (!token || !user) return;
 
     try {
-      const response = await axios.get("http://localhost:8000/project", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      console.log("Projects response:", response.data);
-      setProjects(response.data.projects);
-      if (response.data.projects.length > 0 && !selectedProjectId) {
-        setSelectedProjectId(response.data.projects[0].id);
+      const [projectsResponse, invitationsResponse] = await Promise.all([
+        axios.get("http://localhost:8000/project", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        axios
+          .get(`http://localhost:8000/invitation/user/${user.id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          .catch((error) => {
+            console.warn("Error fetching invitations:", error);
+            return { data: { invitations: [] } };
+          }),
+      ]);
+
+      const allProjects = projectsResponse.data.projects || [];
+      const invitations = invitationsResponse.data.invitations || [];
+
+      const acceptedInvitations = invitations.filter(
+        (inv) => inv.status === "Accepted"
+      );
+
+      const accessibleProjects = allProjects.filter(
+        (project) =>
+          project.userId === user.id ||
+          acceptedInvitations.some((inv) => inv.projectId === project.id)
+      );
+
+      setProjects(accessibleProjects);
+
+      // Only set initial project if not already set
+      if (
+        !isInitialized &&
+        accessibleProjects.length > 0 &&
+        !selectedProjectId
+      ) {
+        setSelectedProjectId(accessibleProjects[0].id);
+        setIsInitialized(true);
       }
     } catch (error) {
-      console.error("Error refreshing projects:", error);
+      console.error("Error fetching projects:", error);
+      setProjects([]);
     }
-  }, [token, selectedProjectId]);
+  }, [token, user, selectedProjectId, isInitialized]);
 
+  // Initial fetch
   useEffect(() => {
-    if (token) {
-      axios
-        .get("http://localhost:8000/project", {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((response) => {
-          setProjects(response.data.projects);
-          if (response.data.projects.length > 0 && !selectedProjectId) {
-            setSelectedProjectId(response.data.projects[0].id);
-          }
-        })
-        .catch((error) => {
-          console.error("Error fetching projects:", error);
-        });
+    if (token && user) {
+      fetchProjects();
     }
-  }, [token, selectedProjectId]);
+  }, [token, user]);
+
+  // Refresh projects when needed (separate from initial fetch)
+  const refreshProjects = useCallback(async () => {
+    await fetchProjects();
+  }, [fetchProjects]);
 
   return (
     <ProjectContext.Provider

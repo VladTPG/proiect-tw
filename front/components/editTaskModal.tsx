@@ -115,6 +115,7 @@ export function EditTaskModal({
         `http://localhost:8000/task/update/${task.id}`,
         {
           task: {
+            id: task.id,
             ...formData,
             userId:
               formData.userId === "unassigned"

@@ -7,12 +7,14 @@ interface SelectorItemProps {
   projectName: string;
   projectId: number;
   onClick?: () => void;
+  isEmptyState?: boolean;
 }
 
 const SelectorItem = ({
   projectName,
   projectId,
   onClick,
+  isEmptyState,
 }: SelectorItemProps) => {
   const { selectedProjectId } = useProject();
   const isSelected = selectedProjectId === projectId;
@@ -22,25 +24,33 @@ const SelectorItem = ({
       onClick={onClick}
       className={cn(
         "w-full px-3 py-2.5 rounded-lg transition-all duration-200",
-        "hover:bg-muted/80 bg-card",
+        isEmptyState ? "bg-muted/50" : "hover:bg-muted/80 bg-card",
         "border border-transparent",
         isSelected
-          ? "border-primary/20 bg-primary/5"
+          ? " bg-primary/5"
           : "text-muted-foreground hover:text-foreground",
-        "cursor-pointer"
+        isEmptyState ? "cursor-default" : "cursor-pointer"
       )}
     >
       <div className="flex items-center gap-3 w-full">
         <div
           className={cn(
             "p-2 rounded-md transition-colors shrink-0",
-            isSelected ? "bg-primary/10" : "bg-muted"
+            isEmptyState
+              ? "bg-muted/50"
+              : isSelected
+              ? "bg-primary/10"
+              : "bg-muted"
           )}
         >
           <Folder
             className={cn(
               "h-4 w-4 transition-colors",
-              isSelected ? "text-primary" : "text-muted-foreground"
+              isEmptyState
+                ? "text-muted-foreground/50"
+                : isSelected
+                ? "text-primary"
+                : "text-muted-foreground"
             )}
           />
         </div>
@@ -48,14 +58,20 @@ const SelectorItem = ({
           <span
             className={cn(
               "text-sm transition-colors truncate",
-              isSelected ? "font-medium text-primary" : "text-foreground"
+              isEmptyState
+                ? "text-muted-foreground"
+                : isSelected
+                ? "font-medium text-primary"
+                : "text-foreground"
             )}
           >
             {projectName}
           </span>
-          <span className="text-xs text-muted-foreground truncate">
-            {`Project #${projectId}`}
-          </span>
+          {!isEmptyState && (
+            <span className="text-xs text-muted-foreground truncate">
+              {`Project #${projectId}`}
+            </span>
+          )}
         </div>
       </div>
     </div>
