@@ -5,13 +5,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import projects from "@/dummy-data/projects";
+import { Folder } from "lucide-react";
 import SelectorItem from "@/components/selectorItem";
 import { useProject } from "@/contexts/ProjectContext";
-import { Folder } from "lucide-react";
 
 export default function Select40() {
-  const { selectedProjectId, setSelectedProjectId } = useProject();
+  const { selectedProjectId, setSelectedProjectId, projects } = useProject();
 
   return (
     <div className="p-4">
@@ -29,10 +28,6 @@ export default function Select40() {
                   projects.find((p) => p.id === selectedProjectId)?.title || ""
                 }
                 projectId={selectedProjectId}
-                managerFK={
-                  projects.find((p) => p.id === selectedProjectId)?.managerFK ||
-                  0
-                }
               />
             ) : (
               <div className="flex items-center gap-2 px-3 py-2 text-muted-foreground">
@@ -58,7 +53,6 @@ export default function Select40() {
                   <SelectorItem
                     projectName={project.title}
                     projectId={project.id}
-                    managerFK={project.managerFK}
                   />
                 </div>
               </SelectItem>

@@ -1,8 +1,6 @@
 "use client";
 
-import type { Task as TaskType } from "@/dummy-data/tasks";
-import users from "@/dummy-data/users";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { PriorityBadge } from "@/components/priorityBadge";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -12,7 +10,36 @@ import {
   Circle,
   CircleDashed,
   XCircle,
+  Pencil,
+  Trash2,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useToken } from "@/contexts/TokenContext";
+import axios from "axios";
+import { Button } from "@/components/ui/button";
+import { Trash } from "lucide-react";
+import { Label } from "@/components/ui/label";
+
+interface Task {
+  id: number;
+  title: string;
+  description: string;
+  deadline: string;
+  status: string;
+  priority: number;
+  userId: number | null;
+  projectId: number;
+}
+
+interface User {
+  id: number;
+  displayName: string;
+}
 
 const StatusIcon = ({ status }: { status: string }) => {
   switch (status) {
@@ -30,51 +57,144 @@ const StatusIcon = ({ status }: { status: string }) => {
 };
 
 interface TaskCardProps {
-  task: TaskType;
-  isSelected: boolean;
-  onToggleSelect: () => void;
+  task: Task;
+  onEdit: (task: Task) => void;
+  onDelete: (taskId: number) => void;
+  isManager: boolean;
+  currentUserId: number;
+  isSelected?: boolean;
+  onToggleSelect?: () => void;
 }
+
+const priorityLabels: { [key: number]: string } = {
+  1: "Critical",
+  2: "Urgent",
+  3: "High",
+  4: "Medium",
+  5: "Low",
+};
 
 export default function TaskCard({
   task,
-  isSelected,
-  onToggleSelect,
-}: TaskCardProps) {
+  onEdit,
+  onDelete,
+  isManager,
+  currentUserId,
+  onTaskUpdated,
+}: TaskCardProps & { onTaskUpdated: () => void }) {
+  const { token } = useToken();
+  const [users, setUsers] = useState<User[]>([]);
+  const [isSubmittingForReview, setIsSubmittingForReview] = useState(false);
+
+  const isAssignedToCurrentUser = task.userId === currentUserId;
+  const canSubmitForReview =
+    isAssignedToCurrentUser && !isManager && task.status !== "Pending Review";
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      if (!token) return;
+      try {
+        const response = await axios.get("http://localhost:8000/auth", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setUsers(response.data);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+
+    fetchUsers();
+  }, [token]);
+
+  const getAssigneeName = (userId: number | null) => {
+    if (!userId) return "Unassigned";
+    const assignee = users.find((u) => u.id === userId);
+    return assignee ? assignee.displayName : "Unknown User";
+  };
+
+  const handleSubmitForReview = async () => {
+    if (!token) return;
+
+    try {
+      setIsSubmittingForReview(true);
+      const response = await axios.put(
+        `http://localhost:8000/task/update/${task.id}`,
+        {
+          task: {
+            ...task,
+            status: "Pending Review",
+          },
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.data.ok) {
+        onTaskUpdated();
+      }
+    } catch (error) {
+      console.error("Error submitting task for review:", error);
+      alert("Failed to submit task for review");
+    } finally {
+      setIsSubmittingForReview(false);
+    }
+  };
+
   return (
-    <tr className="border-b hover:bg-muted/50 group">
-      <td className="w-[40px] p-4">
-        <Checkbox checked={isSelected} onCheckedChange={onToggleSelect} />
-      </td>
-      <td className="p-4">
-        <div className="flex items-center gap-3">
-          <span className="font-medium text-sm flex-1">{task.title}</span>
+    <>
+      <td className="px-4 py-2">
+        <div className="flex items-center gap-2">
+          <span className="font-medium">{task.title}</span>
           <PriorityBadge priority={task.priority} />
         </div>
       </td>
-      <td className="p-4 text-sm text-muted-foreground">{task.description}</td>
-      <td className="p-4">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      <td className="px-4 py-2">{task.description}</td>
+      <td className="px-4 py-2">
+        <div className="flex items-center gap-2">
           <StatusIcon status={task.status} />
           <span>{task.status}</span>
+          {canSubmitForReview && (
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id={`submit-review-${task.id}`}
+                checked={task.status === "Pending Review"}
+                disabled={isSubmittingForReview}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    handleSubmitForReview();
+                  }
+                }}
+              />
+              <Label
+                htmlFor={`submit-review-${task.id}`}
+                className="text-sm text-gray-600"
+              >
+                Submit for Review
+              </Label>
+            </div>
+          )}
         </div>
       </td>
-      <td className="p-4 text-sm text-muted-foreground">
-        {task.userFK
-          ? users.find((user) => user.id === task.userFK)?.displayName
-          : "Unassigned"}
+      <td className="px-4 py-2">{getAssigneeName(task.userId)}</td>
+      <td className="px-4 py-2">
+        {new Date(task.deadline).toLocaleDateString()}
       </td>
-      <td className="p-4 text-sm text-muted-foreground">
-        {task.deadline.toLocaleString("en-US", {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-        })}
+      <td className="px-4 py-2">
+        {isManager && (
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" size="sm" onClick={() => onEdit(task)}>
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => onDelete(task.id)}>
+              <Trash className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
       </td>
-      <td className="w-[40px] p-4">
-        <button className="opacity-0 group-hover:opacity-100 transition-opacity">
-          <MoreVertical className="h-5 w-5 text-muted-foreground" />
-        </button>
-      </td>
-    </tr>
+    </>
   );
 }
