@@ -1,23 +1,43 @@
 "use client";
 
-import React, { useState } from "react";
-import type { Task as TaskType } from "@/dummy-data/tasks";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useToken } from "@/contexts/TokenContext";
 import TaskCard from "./taskCard";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useProject } from "@/contexts/ProjectContext";
 
-interface TaskTableProps {
-  tasks: TaskType[];
+interface Task {
+  id: number;
+  title: string;
+  description: string;
+  deadline: string;
+  status: string;
+  priority: number;
+  userId: number | null;
+  projectId: number;
 }
 
-export function TaskTable({ tasks }: TaskTableProps) {
+export function TaskTable() {
   const [selectedTasks, setSelectedTasks] = useState<Set<number>>(new Set());
+  const [tasks, setTasks] = useState<Task[]>([]);
   const { selectedProjectId } = useProject();
+  const { token } = useToken();
 
-  // Filter tasks for the selected project
-  const projectTasks = tasks.filter(
-    (task) => task.projectFK === selectedProjectId
-  );
+  useEffect(() => {
+    if (selectedProjectId && token) {
+      axios
+        .get(`http://localhost:8000/task/${selectedProjectId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((response) => {
+          setTasks(response.data.tasks || []);
+        })
+        .catch((error) => {
+          console.error("Error fetching tasks:", error);
+        });
+    }
+  }, [selectedProjectId, token]);
 
   const toggleTask = (taskId: number) => {
     const newSelected = new Set(selectedTasks);
@@ -30,10 +50,10 @@ export function TaskTable({ tasks }: TaskTableProps) {
   };
 
   const toggleAll = () => {
-    if (selectedTasks.size === projectTasks.length) {
+    if (selectedTasks.size === tasks.length) {
       setSelectedTasks(new Set());
     } else {
-      setSelectedTasks(new Set(projectTasks.map((task) => task.id)));
+      setSelectedTasks(new Set(tasks.map((task) => task.id)));
     }
   };
 
@@ -52,7 +72,7 @@ export function TaskTable({ tasks }: TaskTableProps) {
           <tr className="border-b bg-muted/50">
             <th className="w-[40px] p-4">
               <Checkbox
-                checked={selectedTasks.size === projectTasks.length}
+                checked={selectedTasks.size === tasks.length}
                 onCheckedChange={toggleAll}
               />
             </th>
@@ -65,7 +85,7 @@ export function TaskTable({ tasks }: TaskTableProps) {
           </tr>
         </thead>
         <tbody>
-          {projectTasks.map((task) => (
+          {tasks.map((task) => (
             <TaskCard
               key={task.id}
               task={task}

@@ -15,8 +15,9 @@ const app = express();
 
 app.use(
   cors({
-    origin: `http://localhost:${FRONT_PORT}`,
-    methods: "GET,PUT,PATCH,POST,DELETE",
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
 );
@@ -28,6 +29,5 @@ app.use("/auth", authRouter);
 app.use("/task", taskRouter);
 app.use("/project", projectRouter);
 app.use("/invitation", invitationRouter);
-
 
 export default app;

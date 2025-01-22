@@ -1,3 +1,6 @@
+"use client";
+
+import React, { useState } from "react";
 import {
   Calendar,
   CheckSquare,
@@ -7,6 +10,7 @@ import {
   Mail,
   Settings,
   Users,
+  Plus,
 } from "lucide-react";
 import {
   Sidebar,
@@ -24,11 +28,29 @@ import { useUser } from "@/contexts/UserContext";
 import { useToken } from "@/contexts/TokenContext";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { useProject } from "@/contexts/ProjectContext";
+import SelectorItem from "./selectorItem";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function AppSidebar() {
   const { user, setUser } = useUser();
   const { token, setToken } = useToken();
   const router = useRouter();
+  const { projects, selectedProjectId, setSelectedProjectId, refreshProjects } =
+    useProject();
+  const [open, setOpen] = useState(false);
+  const [projectName, setProjectName] = useState("");
 
   const handleLogout = () => {
     const config = {
@@ -47,6 +69,35 @@ export default function AppSidebar() {
       .catch((err) => {
         console.log(err.response.data.error);
       });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!token || !user) return;
+
+    try {
+      await axios.post(
+        "http://localhost:8000/project",
+        {
+          title: projectName,
+          userId: user.id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      setProjectName("");
+      setOpen(false);
+      refreshProjects?.(); // Refresh the projects list
+    } catch (error: any) {
+      console.error("Error creating project:", error);
+      alert(error.response?.data?.error || "Failed to create project");
+    }
   };
 
   return (
@@ -74,35 +125,11 @@ export default function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
                   <a
-                    href="/projects"
-                    className="flex items-center space-x-2 p-2 rounded-md"
-                  >
-                    <Folder className="h-5 w-5" />
-                    <span>Projects</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <a
                     href="/tasks"
                     className="flex items-center space-x-2 p-2 rounded-md"
                   >
                     <CheckSquare className="h-5 w-5" />
                     <span>Tasks</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <a
-                    href="/calendar"
-                    className="flex items-center space-x-2 p-2 rounded-md"
-                  >
-                    <Calendar className="h-5 w-5" />
-                    <span>Calendar</span>
                   </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -165,6 +192,45 @@ export default function AppSidebar() {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
+
+      <SidebarGroup>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Dialog open={open} onOpenChange={setOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Create Project
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Create New Project</DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                      <div>
+                        <Label htmlFor="projectName">Project Name</Label>
+                        <Input
+                          id="projectName"
+                          value={projectName}
+                          onChange={(e) => setProjectName(e.target.value)}
+                          placeholder="Enter project name"
+                          required
+                        />
+                      </div>
+                      <Button type="submit" className="w-full">
+                        Create Project
+                      </Button>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
     </Sidebar>
   );
 }

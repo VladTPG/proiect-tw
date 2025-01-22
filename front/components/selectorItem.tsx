@@ -1,25 +1,21 @@
 import React from "react";
 import { useProject } from "@/contexts/ProjectContext";
 import { cn } from "@/lib/utils";
-import { FolderOpen, Users } from "lucide-react";
-import users from "@/dummy-data/users";
+import { Users } from "lucide-react";
 
 interface SelectorItemProps {
   projectName: string;
   projectId: number;
-  managerFK: number;
   onClick?: () => void;
 }
 
 const SelectorItem = ({
   projectName,
   projectId,
-  managerFK,
   onClick,
 }: SelectorItemProps) => {
   const { selectedProjectId } = useProject();
   const isSelected = selectedProjectId === projectId;
-  const manager = users.find((user) => user.id === managerFK);
 
   return (
     <div
@@ -42,11 +38,7 @@ const SelectorItem = ({
       </div>
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
         <Users className="h-3 w-3" />
-        <span className="truncate">
-          {manager
-            ? `Managed by ${manager.displayName}`
-            : "No manager assigned"}
-        </span>
+        <span className="truncate">Project ID: {projectId}</span>
       </div>
     </div>
   );

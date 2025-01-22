@@ -26,7 +26,7 @@ async function checkIfUserExists(email) {
 
 async function checkIfUserExistsById(userId) {
   return await User.findOne({
-      where: { id: userId },
+    where: { id: userId },
   });
 }
 
@@ -34,4 +34,10 @@ async function findUserByPk(id) {
   return await User.findByPk(id);
 }
 
-export { addUser, checkIfUserExists, getUsers, findUserByPk, checkIfUserExistsById};
+export {
+  addUser,
+  checkIfUserExists,
+  getUsers,
+  findUserByPk,
+  checkIfUserExistsById,
+};
