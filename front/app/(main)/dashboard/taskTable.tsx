@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import TaskCard from "@/components/taskCard";
 import { useProject } from "@/contexts/ProjectContext";
 import { useToken } from "@/contexts/TokenContext";
@@ -9,23 +9,8 @@ import axios from "axios";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AddTaskModal } from "@/components/addTaskModal";
 import { EditTaskModal } from "@/components/editTaskModal";
-
-interface User {
-  id: number;
-  displayName: string;
-  email: string;
-}
-
-interface Task {
-  id: number;
-  title: string;
-  description: string;
-  deadline: string;
-  status: string;
-  priority: number;
-  userId: number | null;
-  projectId: number;
-}
+import { Task } from "@/types/task";
+import User from "@/types/user";
 
 const statusLabels: { [key: string]: string } = {
   "Not Started": "Not Started",
@@ -49,7 +34,7 @@ export const TaskTable = () => {
     () => void | undefined
   >(() => () => {});
 
-  const fetchTasks = async () => {
+  const fetchTasks = useCallback(async () => {
     if (selectedProjectId && token) {
       setIsLoading(true);
       try {
@@ -80,7 +65,11 @@ export const TaskTable = () => {
         setIsLoading(false);
       }
     }
-  };
+  }, [selectedProjectId, token]);
+
+  useEffect(() => {
+    fetchTasks();
+  }, [fetchTasks]);
 
   const fetchUsers = async () => {
     if (!token) return;

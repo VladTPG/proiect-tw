@@ -1,6 +1,7 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useToken } from "@/contexts/TokenContext";
 import { useUser } from "@/contexts/UserContext";
 import axios from "axios";
@@ -13,28 +14,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-interface Task {
-  id: number;
-  title: string;
-  description: string;
-  deadline: string;
-  status: string;
-  priority: number;
-  userId: number | null;
-  projectId: number;
-}
-
-interface Project {
-  id: number;
-  title: string;
-  userId: number;
-}
-
-interface User {
-  id: number;
-  displayName: string;
-}
+import { Task } from "@/types/task";
+import User from "@/types/user";
+import { Project } from "@/types/project";
 
 export default function TaskHistory() {
   const { token } = useToken();
@@ -52,7 +34,7 @@ export default function TaskHistory() {
   }>({});
 
   // Fetch all projects the user manages
-  const fetchManagedProjects = async () => {
+  const fetchManagedProjects = useCallback(async () => {
     if (!token || !user) return [];
     try {
       const response = await axios.get("http://localhost:8000/project", {
@@ -71,27 +53,30 @@ export default function TaskHistory() {
       setManagedProjects([]); // Set empty array on error
       return [];
     }
-  };
+  }, [token, user]);
 
   // Fetch tasks for a specific project
-  const fetchProjectTasks = async (projectId: number) => {
-    if (!token) return;
-    try {
-      const response = await axios.get(
-        `http://localhost:8000/task/${projectId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      return response.data.tasks || [];
-    } catch (error) {
-      console.error(`Error fetching tasks for project ${projectId}:`, error);
-      return [];
-    }
-  };
+  const fetchProjectTasks = useCallback(
+    async (projectId: number) => {
+      if (!token) return [];
+      try {
+        const response = await axios.get(
+          `http://localhost:8000/task/${projectId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        return response.data.tasks || [];
+      } catch (error) {
+        console.error(`Error fetching tasks for project ${projectId}:`, error);
+        return [];
+      }
+    },
+    [token]
+  );
 
   // Fetch all tasks assigned to the user
-  const fetchAssignedTasks = async () => {
+  const fetchAssignedTasks = useCallback(async () => {
     if (!token || !user) return;
     try {
       const response = await axios.get("http://localhost:8000/task", {
@@ -104,7 +89,7 @@ export default function TaskHistory() {
     } catch (error) {
       console.error("Error fetching assigned tasks:", error);
     }
-  };
+  }, [token, user]);
 
   // Handle task deletion
   const handleDeleteTask = async (taskId: number) => {
@@ -119,23 +104,8 @@ export default function TaskHistory() {
     }
   };
 
-  // Refresh all tasks
-  const refreshTasks = async () => {
-    setIsLoading(true);
-    await fetchAssignedTasks();
-    const projects = await fetchManagedProjects();
-    const tasksMap: { [key: number]: Task[] } = {};
-
-    for (const project of projects) {
-      tasksMap[project.id] = await fetchProjectTasks(project.id);
-    }
-
-    setProjectTasks(tasksMap);
-    setIsLoading(false);
-  };
-
   // Add function to fetch users
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     if (!token) return;
     try {
       const response = await axios.get("http://localhost:8000/auth", {
@@ -145,12 +115,14 @@ export default function TaskHistory() {
     } catch (error) {
       console.error("Error fetching users:", error);
     }
-  };
+  }, [token]);
 
   // Update useEffect to fetch users
   useEffect(() => {
-    fetchUsers();
-  }, [token]);
+    if (token) {
+      fetchUsers();
+    }
+  }, [token, fetchUsers]);
 
   // Function to handle user filter change
   const handleUserFilterChange = (projectId: number, userId: string) => {
@@ -172,9 +144,39 @@ export default function TaskHistory() {
     return tasks.filter((task) => task.userId === userFilter);
   };
 
+  // Add useCallback for refreshTasks
+  const refreshTasks = useCallback(async () => {
+    if (!token || !user) return;
+
+    setIsLoading(true);
+    try {
+      await fetchAssignedTasks();
+      const projects = await fetchManagedProjects();
+      const tasksMap: { [key: number]: Task[] } = {};
+
+      for (const project of projects) {
+        tasksMap[project.id] = await fetchProjectTasks(project.id);
+      }
+
+      setProjectTasks(tasksMap);
+    } catch (error) {
+      console.error("Error refreshing tasks:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [
+    token,
+    user,
+    fetchAssignedTasks,
+    fetchManagedProjects,
+    fetchProjectTasks,
+  ]);
+
   useEffect(() => {
-    refreshTasks();
-  }, [token, user]);
+    if (token && user) {
+      refreshTasks();
+    }
+  }, [token, user, refreshTasks]);
 
   if (isLoading) {
     return (
@@ -310,7 +312,7 @@ export default function TaskHistory() {
           ))
         ) : (
           <div className="text-center p-4 text-muted-foreground border rounded-lg">
-            You don't manage any projects.
+            You don&apos;t manage any projects.
           </div>
         )}
       </section>

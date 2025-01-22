@@ -91,6 +91,11 @@ export function TaskTable() {
               task={task}
               isSelected={selectedTasks.has(task.id)}
               onToggleSelect={() => toggleTask(task.id)}
+              onEdit={() => {}}
+              onDelete={() => {}}
+              isManager={false}
+              currentUserId={0}
+              onTaskUpdated={() => {}}
             />
           ))}
         </tbody>

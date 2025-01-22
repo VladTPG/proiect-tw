@@ -23,6 +23,7 @@ import { useToken } from "@/contexts/TokenContext";
 import { useUser } from "@/contexts/UserContext";
 import axios from "axios";
 import { Plus } from "lucide-react";
+import User from "@/types/user";
 
 interface AddTaskModalProps {
   projectId: number;
@@ -165,6 +166,15 @@ export function AddTaskModal({ projectId, onTaskAdded }: AddTaskModalProps) {
       fetchUsers();
     }
   }, [token, open]);
+
+  useEffect(() => {
+    if (user?.id) {
+      setFormData((prev) => ({
+        ...prev,
+        userId: user.id.toString(),
+      }));
+    }
+  }, [user?.id]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

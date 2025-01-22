@@ -1,4 +1,7 @@
 {
-  "extends": "next",
-  "parser": "@typescript-eslint/parser"
+  "extends": "next/core-web-vitals",
+  "parser": "@typescript-eslint/parser",
+  "rules": {
+    "react-hooks/exhaustive-deps": "warn"
+  }
 }

@@ -62,6 +62,8 @@ interface TaskCardProps {
   onDelete: (taskId: number) => void;
   isManager: boolean;
   currentUserId: number;
+  isSelected?: boolean;
+  onToggleSelect?: () => void;
 }
 
 const priorityLabels: { [key: number]: string } = {
