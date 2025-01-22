@@ -28,7 +28,10 @@ export const TaskTable = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isManager, setIsManager] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
-  const [projectName, setProjectName] = useState("");
+  const [projectDetails, setProjectDetails] = useState<{
+    title: string;
+    managerName: string;
+  }>({ title: "", managerName: "" });
   const [open, setOpen] = useState(false);
   const [refreshProjects, setRefreshProjects] = useState<
     () => void | undefined
@@ -121,6 +124,29 @@ export const TaskTable = () => {
     fetchUsers();
   }, [token]);
 
+  useEffect(() => {
+    const fetchProjectDetails = async () => {
+      if (!selectedProjectId || !token) return;
+
+      try {
+        const response = await axios.get(
+          `http://localhost:8000/project/${selectedProjectId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setProjectDetails({
+          title: response.data.project.title,
+          managerName: response.data.project.user?.displayName || "Unknown",
+        });
+      } catch (error) {
+        console.error("Error fetching project details:", error);
+      }
+    };
+
+    fetchProjectDetails();
+  }, [selectedProjectId, token]);
+
   const getUserName = (userId: number | null) => {
     if (!userId) return "Unassigned";
     const user = users.find((u) => u.id === userId);
@@ -177,14 +203,14 @@ export const TaskTable = () => {
     try {
       console.log(
         "Creating project with name:",
-        projectName,
+        projectDetails.title,
         "and userId:",
         user.id
       );
       const response = await axios.post(
         "http://localhost:8000/project",
         {
-          name: projectName,
+          name: projectDetails.title,
           userId: user.id,
         },
         {
@@ -198,7 +224,6 @@ export const TaskTable = () => {
       console.log("Project creation response:", response.data);
 
       if (response.data.success) {
-        setProjectName("");
         setOpen(false);
         setRefreshProjects(() => () => fetchTasks());
         alert("Project created successfully!");
@@ -229,6 +254,13 @@ export const TaskTable = () => {
 
   return (
     <div className="space-y-4">
+      <div className="flex flex-col gap-1">
+        <h2 className="text-2xl font-bold">{projectDetails.title}</h2>
+        <p className="text-sm text-muted-foreground">
+          Project Manager: {projectDetails.managerName}
+        </p>
+      </div>
+
       {isManager && (
         <>
           <AddTaskModal

@@ -29,7 +29,7 @@ import { useToken } from "@/contexts/TokenContext";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useProject } from "@/contexts/ProjectContext";
-import SelectorItem from "./selectorItem";
+import SelectorItem from "@/components/selectorItem.tsx";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";

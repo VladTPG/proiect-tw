@@ -1,7 +1,10 @@
 import { Project } from "../index.js";
+import { User } from "../index.js";
 
 async function checkIfProjectExists(id) {
-  return await Project.findByPk(id);
+  return await Project.findByPk(id, {
+    include: [{ model: User, as: "user", attributes: ["id", "displayName"] }],
+  });
 }
 
 async function createProject(project) {
@@ -20,7 +23,9 @@ async function createProject(project) {
 }
 
 async function getAllProjects() {
-  return await Project.findAll({});
+  return await Project.findAll({
+    include: [{ model: User, as: "user", attributes: ["id", "displayName"] }],
+  });
 }
 
 async function updateProject(project) {

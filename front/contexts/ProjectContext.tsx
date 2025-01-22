@@ -38,6 +38,7 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
       const response = await axios.get("http://localhost:8000/project", {
         headers: { Authorization: `Bearer ${token}` },
       });
+      console.log("Projects response:", response.data);
       setProjects(response.data.projects);
       if (response.data.projects.length > 0 && !selectedProjectId) {
         setSelectedProjectId(response.data.projects[0].id);

@@ -4,6 +4,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AppSidebar from "@/components/app-sidebar";
 import { usePathname } from "next/navigation";
 import { ProjectProvider } from "@/contexts/ProjectContext";
+import SelectorItem from "@/components/selectorItem.tsx";
 
 export default function Layout({ children }) {
   const pathname = usePathname();

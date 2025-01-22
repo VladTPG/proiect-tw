@@ -6,7 +6,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Folder } from "lucide-react";
-import SelectorItem from "@/components/selectorItem";
+import SelectorItem from "@/components/selectorItem.tsx";
 import { useProject } from "@/contexts/ProjectContext";
 
 export default function Select40() {
@@ -49,12 +49,10 @@ export default function Select40() {
                 value={`option${project.id}`}
                 className="p-0 focus:bg-transparent hover:bg-transparent focus:text-foreground data-[highlighted]:bg-transparent"
               >
-                <div className="pl-2">
-                  <SelectorItem
-                    projectName={project.title}
-                    projectId={project.id}
-                  />
-                </div>
+                <SelectorItem
+                  projectName={project.title}
+                  projectId={project.id}
+                />
               </SelectItem>
             ))
           ) : (
